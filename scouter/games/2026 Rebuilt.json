@@ -82,14 +82,14 @@
       "bgColor": "#00A3E0"
     },
     {
-      "name": "placeholder (blank)",
-      "code": "placeholder_(blank)",
-      "type": "cooperative",
-      "location": "anywhere",
+      "name": "",
+      "code": "",
+      "type": "offense",
+      "location": "",
       "layout": "rect-1",
       "autonPoints": 0,
       "teleopPoints": 0,
-      "bgColor": "#FFFFFF"
+      "bgColor": "undefined"
     },
     {
       "name": "Climb lv 3",
@@ -122,6 +122,16 @@
       "bgColor": "#00BB00"
     },
     {
+      "name": "",
+      "code": "",
+      "type": "offense",
+      "location": "",
+      "layout": "rect-1",
+      "autonPoints": 0,
+      "teleopPoints": 0,
+      "bgColor": "undefined"
+    },
+    {
       "name": "Undo",
       "code": "undo",
       "type": "offense",
@@ -132,16 +142,6 @@
       "bgColor": "#FFA100"
     },
     {
-      "name": "placeholder (fullsize)",
-      "code": "placeholder_(fullsize)",
-      "type": "cooperative",
-      "location": "anywhere",
-      "layout": "rect-1",
-      "autonPoints": 0,
-      "teleopPoints": 0,
-      "bgColor": "#FFFFFF"
-    },
-    {
       "name": "Disabled",
       "code": "disabled",
       "type": "cooperative",
@@ -150,66 +150,6 @@
       "autonPoints": 0,
       "teleopPoints": 0,
       "bgColor": "#E80000"
-    },
-    {
-      "name": "placeholder (fullsize)",
-      "code": "placeholder_(fullsize)",
-      "type": "cooperative",
-      "location": "anywhere",
-      "layout": "rect-1",
-      "autonPoints": 0,
-      "teleopPoints": 0,
-      "bgColor": "#FFFFFF"
-    },
-    {
-      "name": "Zone defense",
-      "code": "zone_defense",
-      "type": "defense",
-      "location": "anywhere",
-      "layout": "rect-2",
-      "autonPoints": 0,
-      "teleopPoints": 0,
-      "bgColor": "#CBB9A1"
-    },
-    {
-      "name": "Push opponent",
-      "code": "push_opponent",
-      "type": "defense",
-      "location": "anywhere",
-      "layout": "rect-2",
-      "autonPoints": 0,
-      "teleopPoints": 0,
-      "bgColor": "#CBB9A1"
-    },
-    {
-      "name": "Bump shooter",
-      "code": "bump_shooter",
-      "type": "defense",
-      "location": "anywhere",
-      "layout": "rect-2",
-      "autonPoints": 0,
-      "teleopPoints": 0,
-      "bgColor": "#CBB9A1"
-    },
-    {
-      "name": "Block lane",
-      "code": "block_lane",
-      "type": "defense",
-      "location": "anywhere",
-      "layout": "rect-2",
-      "autonPoints": 0,
-      "teleopPoints": 0,
-      "bgColor": "#CBB9A1"
-    },
-    {
-      "name": "Pin",
-      "code": "pin",
-      "type": "defense",
-      "location": "anywhere",
-      "layout": "rect-2",
-      "autonPoints": 0,
-      "teleopPoints": 0,
-      "bgColor": "#CBB9A1"
     }
   ]
 }

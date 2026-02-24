@@ -95,6 +95,29 @@
         box-shadow: 0 0 10px rgba(120, 170, 220, 0.1);
     }
 
+    /* ── Back Button ── */
+    .back-btn {
+        position: fixed;
+        top: 12px;
+        left: 14px;
+        z-index: 200;
+        background: transparent;
+        border: var(--border-width) solid var(--border);
+        color: var(--text-dim);
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        padding: 5px 10px;
+        cursor: pointer;
+        letter-spacing: 0.06em;
+        text-decoration: none;
+        transition: border-color 0.25s, color 0.25s;
+    }
+
+    .back-btn:hover {
+        border-color: var(--border-bright);
+        color: var(--text-bright);
+    }
+
     /* ── Fullscreen Button ── */
     .fullscreen-btn {
         position: fixed;
@@ -208,7 +231,7 @@
         justify-content: space-between;
         align-items: center;
         font-family: var(--font-mono);
-        font-size: 1.00rem;
+        font-size: 0.78rem;
         color: var(--text-primary);
         transition: border-color 0.25s;
     }
@@ -336,6 +359,7 @@
 </head>
 <body>
 
+<a class="back-btn" href="/stat_owl/dashboard" title="Back to Dashboard">&#x2190; DASHBOARD</a>
 <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle fullscreen">&#x26F6; FULLSCREEN</button>
 
 <?php
@@ -472,9 +496,9 @@
 
         // ── Sidebar stats (change labels and values here) ──
         $stats = [
-            ['label' => 'Fuel %',  'value' => $fuelSuccessRate . '%'],
-            ['label' => 'Avg FPM',  'value' => $avgLine . ' FPM'],
-            ['label' => 'Auton Avg',  'value' => $autonAvg],
+            ['label' => 'Fuel Success %',  'value' => $fuelSuccessRate . '%'],
+            ['label' => 'Avg Fuel Shot per Match',  'value' => $avgLine . ' FPM'],
+            ['label' => 'Auton Avg Points',  'value' => $autonAvg],
             ['label' => 'Defense Count',  'value' => $defenseCount],
         ];
 
@@ -523,6 +547,17 @@
         $teamNumbers = ["5411", "1234", "9999"];
     }
 
+    // ── JSON API mode: return data for AJAX polling ──
+    if (isset($_GET['format']) && $_GET['format'] === 'json') {
+        header('Content-Type: application/json');
+        $allTeamData = [];
+        foreach ($teamNumbers as $team) {
+            $allTeamData[] = getSampleData($team, $eventNameQuery, $pdo, $blueAllianceApiKey, $matchLabelPrefix);
+        }
+        echo json_encode($allTeamData);
+        exit;
+    }
+
 ?>
 
 <!-- Chart.js Global Defaults (set once) -->
@@ -531,6 +566,8 @@
     Chart.defaults.borderColor = 'rgba(160, 190, 220, 0.18)';
     Chart.defaults.font.family = "'Share Tech Mono', monospace";
     Chart.defaults.font.size = 10;
+
+    window.owlCharts = {};
 </script>
 
 <div class="page-wrapper">
@@ -577,7 +614,7 @@
     $barChartId = "barChart_$index";
 ?>
 
-    <div class="dashboard" data-team="<?php echo htmlspecialchars($teamNumber); ?>" data-name="<?php echo htmlspecialchars(strtolower($teamName)); ?>">
+    <div class="dashboard" data-team="<?php echo htmlspecialchars($teamNumber); ?>" data-name="<?php echo htmlspecialchars(strtolower($teamName)); ?>" data-index="<?php echo $index; ?>">
 
         <!-- Main Content Grid -->
         <div class="content-grid">
@@ -655,7 +692,7 @@
         const lineCtx = document.getElementById('<?php echo $lineChartId; ?>').getContext('2d');
         const avgDataset = new Array(perfLabels.length).fill(avgValue);
 
-        new Chart(lineCtx, {
+        window.owlCharts['<?php echo $lineChartId; ?>'] = new Chart(lineCtx, {
             type: 'line',
             data: {
                 labels: perfLabels,
@@ -703,7 +740,7 @@
         /* ── Horizontal Bar Chart (Climb Levels) ── */
         const barCtx = document.getElementById('<?php echo $barChartId; ?>').getContext('2d');
 
-        new Chart(barCtx, {
+        window.owlCharts['<?php echo $barChartId; ?>'] = new Chart(barCtx, {
             type: 'bar',
             data: {
                 labels: climbLabels,
@@ -826,6 +863,54 @@
     document.addEventListener('fullscreenchange', function() {
         btn.textContent = document.fullscreenElement ? '\u26F6 EXIT' : '\u26F6 FULLSCREEN';
     });
+})();
+
+// ── Auto-refresh data every second ──
+(function() {
+    const url = new URL(window.location.href);
+    url.searchParams.set('format', 'json');
+
+    setInterval(function() {
+        fetch(url.toString())
+            .then(res => res.json())
+            .then(teams => {
+                teams.forEach(function(data, i) {
+                    const card = document.querySelector('.dashboard[data-index="' + i + '"]');
+                    if (!card) return;
+
+                    // Update stats in the sidebar
+                    const rows = card.querySelectorAll('.match-row');
+                    if (data.stats) {
+                        data.stats.forEach(function(s, si) {
+                            if (rows[si]) {
+                                rows[si].querySelector('.match-label').textContent = s.label;
+                                rows[si].querySelector('.match-score').textContent = s.value;
+                            }
+                        });
+                    }
+
+                    // Update line chart
+                    const lineChart = window.owlCharts['lineChart_' + i];
+                    if (lineChart && data.performanceLabels) {
+                        const labels = JSON.parse(data.performanceLabels);
+                        const perfData = JSON.parse(data.performanceData);
+                        lineChart.data.labels = labels;
+                        lineChart.data.datasets[0].data = perfData;
+                        lineChart.data.datasets[1].data = new Array(labels.length).fill(data.avgLine);
+                        lineChart.update('none');
+                    }
+
+                    // Update bar chart
+                    const barChart = window.owlCharts['barChart_' + i];
+                    if (barChart && data.climbLabels) {
+                        barChart.data.labels = JSON.parse(data.climbLabels);
+                        barChart.data.datasets[0].data = JSON.parse(data.climbData);
+                        barChart.update('none');
+                    }
+                });
+            })
+            .catch(function() {});
+    }, 1000);
 })();
 </script>
 
