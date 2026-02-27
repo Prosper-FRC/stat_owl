@@ -133,6 +133,10 @@
               <label for="eventDropdown"><strong>Owl Cards:</strong></label>
               <a href ="owlcards.php"><img class="icon" src="../icons/table.png" alt="owl Cards"></a>
           </div>
+          <div class="grid-item">
+            <label for="eventDropdown"><strong>Cloud Upload</strong></label>
+            <a href ="globalupload.php"><img class="icon" src="../icons/table.png" alt="cloud Upload"> </a>
+          </div>
 
         </div>
       </div>
